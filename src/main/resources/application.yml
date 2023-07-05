@@ -1,0 +1,14 @@
+server:
+  port: 8085
+
+spring:
+  main.banner-mode: 'off'
+logging.level:
+  root: INFO
+
+ar:
+  vicria:
+    adapter:
+      telegram:
+        botUserName:
+        botToken:

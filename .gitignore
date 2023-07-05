@@ -1,0 +1,12 @@
+syntax: glob
+*.orig
+*.log.*
+*.log
+.idea/*
+*.iml
+.settings
+.project
+.classpath
+target/
+.flattened-pom.xml
+dependency-reduced-pom.xml
