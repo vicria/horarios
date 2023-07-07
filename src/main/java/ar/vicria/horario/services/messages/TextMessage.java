@@ -1,6 +1,8 @@
 package ar.vicria.horario.services.messages;
 
-import ar.vicria.horario.RowUtil;
+import ar.vicria.horario.services.util.RowUtil;
+import ar.vicria.horario.dto.EventDto;
+import ar.vicria.horario.dto.Week;
 import ar.vicria.horario.services.callbacks.dto.AnswerDto;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -9,7 +11,10 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Base class for responding on text messages.
@@ -50,14 +55,14 @@ public abstract class TextMessage {
      * @param chatId number of user chat
      * @return message for sending
      */
-    public abstract SendMessage process(String chatId);
+    public abstract SendMessage process(String chatId) throws Exception;
 
     /**
      * text in message.
      *
      * @return text
      */
-    abstract String question();
+    abstract String question() throws Exception;
 
     /**
      * default method for query message.
@@ -100,5 +105,37 @@ public abstract class TextMessage {
         message.setReplyMarkup(new ReplyKeyboardMarkup(rows));
         message.setParseMode("HTML");
         return message;
+    }
+
+    String horario(Map<Week, List<EventDto>> collect) {
+        List<Week> sorted = new ArrayList<>(collect.keySet());
+        var horario = new StringBuilder();
+        sorted.sort(Comparator.comparingInt(Week::getNumber));
+        for (var day : sorted) {
+            horario.append(day.getRus());
+            horario.append(collect.get(day).get(0).getStart().getDayOfMonth());
+            horario.append(".");
+            horario.append(collect.get(day).get(0).getStart().getMonthOfYear());
+            horario.append(": ");
+            List<String> eventDtos = collect.get(day).stream()
+                    .map(time -> {
+                        StringBuilder times = new StringBuilder();
+                        times.append(time.getStart().getHourOfDay());
+                        times.append(":");
+                        int minuteOfHour1 = time.getStart().getMinuteOfHour();
+                        times.append(minuteOfHour1 < 9 ? "00" : minuteOfHour1);
+                        times.append("-");
+                        times.append(time.getEnd().getHourOfDay());
+                        times.append(":");
+                        int minuteOfHour = time.getEnd().getMinuteOfHour();
+                        times.append(minuteOfHour < 9 ? "00" : minuteOfHour);
+                        times.append(" ");
+                        return times.toString();
+                    }).collect(Collectors.toList());
+            horario.append(" ");
+            horario.append(String.join(" ", eventDtos));
+            horario.append("\n");
+        }
+        return horario.toString();
     }
 }

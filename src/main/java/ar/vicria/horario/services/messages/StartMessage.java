@@ -1,6 +1,6 @@
 package ar.vicria.horario.services.messages;
 
-import ar.vicria.horario.RowUtil;
+import ar.vicria.horario.services.util.RowUtil;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 

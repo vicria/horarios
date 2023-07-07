@@ -115,20 +115,34 @@ public class TelegramConnector extends TelegramLongPollingBot {
             String chatId = message.getFrom().getId().toString();
             String msg = message.getText();
 
-            SendMessage process = messages.stream()
+
+            if (msg.contains("@" + getBotUsername())) {
+                // Бот был упомянут в сообщении
+                chatId = message.getChat().getId().toString();
+            }
+
+            String finalChatId = chatId;
+            Optional<SendMessage> process = messages.stream()
                     .filter(m -> m.supports(msg))
                     .findFirst()
-                    .map(m -> m.process(chatId))
-                    .orElseGet(() -> SendMessage.builder()
-                            .chatId(chatId)
-                            .text("Выберите пункт из меню")
-                            .build());
+                    .map(m -> {
+                        try {
+                            return Optional.of(m.process(finalChatId));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            return Optional.<SendMessage>empty();
+                        }
+                    })
+                    .orElseGet(Optional::empty);
 
             try {
-                execute(process);
+                if (process.isPresent()) {
+                    execute(process.get());
+                }
             } catch (TelegramApiException e) {
                 log.error("Unable to send message", e);
             }
+
         } else if (update.hasCallbackQuery()) {
             CallbackQuery callbackQuery = update.getCallbackQuery();
             processCallbackQuery(callbackQuery);

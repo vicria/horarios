@@ -1,4 +1,4 @@
-package ar.vicria.horario;
+package ar.vicria.horario.services.util;
 
 import ar.vicria.horario.services.callbacks.dto.AnswerData;
 import ar.vicria.horario.services.callbacks.dto.AnswerDto;

@@ -1,6 +1,6 @@
 package ar.vicria.horario.services.callbacks;
 
-import ar.vicria.horario.RowUtil;
+import ar.vicria.horario.services.util.RowUtil;
 import ar.vicria.horario.services.callbacks.dto.AnswerData;
 import ar.vicria.horario.services.callbacks.dto.AnswerDto;
 import org.springframework.stereotype.Component;
