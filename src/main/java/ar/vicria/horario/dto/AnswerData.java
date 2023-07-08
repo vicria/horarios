@@ -1,4 +1,4 @@
-package ar.vicria.horario.services.callbacks.dto;
+package ar.vicria.horario.dto;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

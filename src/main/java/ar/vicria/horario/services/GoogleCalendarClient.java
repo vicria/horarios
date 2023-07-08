@@ -40,7 +40,7 @@ public class GoogleCalendarClient {
 
     private Credential credential;
 
-    public List<Event> getMySchedule() throws Exception {
+    public List<Event> getMySchedule(boolean thisWeek) throws Exception {
         Credential credential = authorize();
         Calendar service = new Calendar.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, credential)
                 .setApplicationName(APPLICATION_NAME)
@@ -48,8 +48,8 @@ public class GoogleCalendarClient {
 
         String calendarId = "primary"; // Идентификатор вашего календаря, например, "primary"
 
-        DateTime startOfWeek = DateUtil.startOfThisWeek();
-        DateTime endOfWeek = DateUtil.endOfThisWeek();
+        DateTime startOfWeek = thisWeek ? DateUtil.startOfThisWeek() : DateUtil.startOfNextWeek();
+        DateTime endOfWeek = thisWeek ? DateUtil.endOfThisWeek() : DateUtil.endOfNextWeek();
         com.google.api.client.util.DateTime start = new com.google.api.client.util.DateTime(startOfWeek.toDate());
         com.google.api.client.util.DateTime end = new com.google.api.client.util.DateTime(endOfWeek.toDate());
         Events events = service.events().list(calendarId)

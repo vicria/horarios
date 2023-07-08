@@ -4,11 +4,16 @@ import ar.vicria.horario.dto.EventDto;
 import ar.vicria.horario.dto.Week;
 import ar.vicria.horario.mapper.EventMapper;
 import ar.vicria.horario.services.GoogleCalendarClient;
+import ar.vicria.horario.dto.AnswerData;
+import ar.vicria.horario.dto.AnswerDto;
 import ar.vicria.horario.services.util.RowUtil;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,6 +26,10 @@ public class FreeTimeNextWeekMessage extends TextMessage {
 
     private final GoogleCalendarClient client;
     private final EventMapper mapper;
+
+    private Integer hours = 0;
+    private String city = "Буэнос Айрес";
+    private boolean empty = false;
 
     /**
      * Constrictor.
@@ -36,32 +45,51 @@ public class FreeTimeNextWeekMessage extends TextMessage {
     }
 
     @Override
-    public boolean supports(String msg) {
-        return msg.equals("/free_time");
+    public boolean supports(AnswerData answerData, String msg) {
+        empty = false;
+        if (!answerData.getAnswerCode().equals(100)) {
+            hours = answerData.getAnswerCode();
+            List<AnswerDto> answer = answer();
+            city = answer.stream()
+                    .filter(ans -> ans.getCode().equals(answerData.getAnswerCode()))
+                    .findFirst()
+                    .get().getText();;
+        }
+        return answerData.getQuestionId().equals(FreeTimeMessage.class.getSimpleName()) && answerData.getAnswerCode().equals(100)
+                || answerData.getQuestionId().equals(getClass().getSimpleName()) && !answerData.getAnswerCode().equals(100);
     }
 
     @Override
-    public SendMessage process(String chatId) throws Exception {
-        SendMessage message = SendMessage.builder()
-                .chatId(chatId)
-                .text(question())
-                .build();
-        return sendMessage(message, answer());
+    public BotApiMethod process(String chatId, Integer msgId) throws Exception {
+        return postQuestionEdit(msgId, question(), getClass().getSimpleName(), answer(), chatId);
     }
 
     @Override
     public String question() throws Exception {
-        Map<Week, List<EventDto>> collect = client.getMySchedule().stream()
+        Map<Week, List<EventDto>> collect = client.getMySchedule(false).stream()
                 .map(mapper::toDto)
                 .collect(Collectors.groupingBy(event -> {
                     int dayOfWeek = event.getStart().getDayOfWeek();
                     return Week.init(dayOfWeek);
                 }));
+        Map<Week, List<EventDto>> free = new HashMap<>();
+        for (var week : collect.keySet()) {
+            List<EventDto> eventDtos = collect.get(week);
+            List<EventDto> freeWindows = inverse(eventDtos).stream()
+                    .peek(eventDto -> eventDto.setStart(eventDto.getStart().plusHours(hours)))
+                    .peek(eventDto -> eventDto.setEnd(eventDto.getEnd().plusHours(hours)))
+                    .collect(Collectors.toList());
+            if (!freeWindows.isEmpty()) {
+                free.put(week, freeWindows);
+            }
+        }
+        String horario = horario(free);
 
-        String horario = horario(collect);
-
-        return "<b>Свободное время на следующей неделе "
-                + "</b> \n" + horario;
+        if (horario.isEmpty()) {
+            empty = true;
+            return "Свободного времени на следующей неделе нет";
+        } else return "<b>Свободное время на следующей неделе (" + city
+                + ")</b> \n" + horario;
     }
 
     /**
@@ -69,7 +97,12 @@ public class FreeTimeNextWeekMessage extends TextMessage {
      *
      * @return buttons
      */
-    public List<String> answer() {
-        return Collections.emptyList();
+    @Override
+    public List<AnswerDto> answer() {
+        List<AnswerDto> answerDtos = new java.util.ArrayList<>(Collections.singletonList(new AnswerDto("⬅️", 100)));
+        if (!empty) {
+            answerDtos.addAll(super.answer());
+        }
+        return answerDtos;
     }
 }

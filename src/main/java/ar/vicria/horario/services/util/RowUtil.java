@@ -1,7 +1,7 @@
 package ar.vicria.horario.services.util;
 
-import ar.vicria.horario.services.callbacks.dto.AnswerData;
-import ar.vicria.horario.services.callbacks.dto.AnswerDto;
+import ar.vicria.horario.dto.AnswerData;
+import ar.vicria.horario.dto.AnswerDto;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;

@@ -1,6 +1,9 @@
 package ar.vicria.horario.services.messages;
 
+import ar.vicria.horario.dto.AnswerData;
+import ar.vicria.horario.dto.AnswerDto;
 import ar.vicria.horario.services.util.RowUtil;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
@@ -10,6 +13,7 @@ import java.util.List;
 /**
  * Text msg after /start.
  */
+@Order(0)
 @Component
 public class StartMessage extends TextMessage {
 
@@ -22,17 +26,17 @@ public class StartMessage extends TextMessage {
     }
 
     @Override
-    public boolean supports(String msg) {
+    public boolean supports(AnswerData answerData, String msg) {
         return msg.equals("/start");
     }
 
     @Override
-    public SendMessage process(String chatId) {
+    public SendMessage process(String chatId, Integer msgId) {
         SendMessage message = SendMessage.builder()
                 .chatId(chatId)
                 .text(question())
                 .build();
-        return sendMessage(message, answer());
+        return sendMessage(message, Collections.emptyList());
     }
 
     @Override
@@ -44,7 +48,8 @@ public class StartMessage extends TextMessage {
      * buttons.
      * @return buttons
      */
-    public List<String> answer() {
+    @Override
+    public List<AnswerDto> answer() {
         return Collections.emptyList();
     }
 }

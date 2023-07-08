@@ -1,17 +1,16 @@
 package ar.vicria.horario.services;
 
 import ar.vicria.horario.properties.TelegramProperties;
-import ar.vicria.horario.services.callbacks.Query;
-import ar.vicria.horario.services.callbacks.dto.AnswerData;
+import ar.vicria.horario.dto.AnswerData;
 import ar.vicria.horario.services.messages.TextMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
-import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -35,7 +34,6 @@ public class TelegramConnector extends TelegramLongPollingBot {
 
     private final TelegramProperties properties;
 
-    private final List<Query> callbacks;
     private final List<TextMessage> messages;
 
     @PostConstruct
@@ -108,8 +106,8 @@ public class TelegramConnector extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        if (update.hasMessage()) {
-            Message message = update.getMessage();
+        if (update.hasMessage() || update.hasCallbackQuery()) {
+            Message message = update.hasCallbackQuery() ? update.getCallbackQuery().getMessage() : update.getMessage();
             log.info("Received answer: name = {}; text = {}", message.getFrom().getFirstName(), message.getText());
 
             String chatId = message.getFrom().getId().toString();
@@ -121,16 +119,27 @@ public class TelegramConnector extends TelegramLongPollingBot {
                 chatId = message.getChat().getId().toString();
             }
 
+            AnswerData answerData = null;
+            if (update.hasCallbackQuery()) {
+                chatId = String.valueOf(message.getChat().getId());
+                String messageText = update.getCallbackQuery().getData();
+
+                if (AnswerData.match(messageText)) {
+                    answerData = AnswerData.deserialize(messageText);
+                }
+            }
+
             String finalChatId = chatId;
-            Optional<SendMessage> process = messages.stream()
-                    .filter(m -> m.supports(msg))
+            AnswerData finalAnswerData = answerData;
+            Optional<BotApiMethod> process = messages.stream()
+                    .filter(m -> m.supports(finalAnswerData, msg))
                     .findFirst()
                     .map(m -> {
                         try {
-                            return Optional.of(m.process(finalChatId));
+                            return Optional.of(m.process(finalChatId, message.getMessageId()));
                         } catch (Exception e) {
                             e.printStackTrace();
-                            return Optional.<SendMessage>empty();
+                            return Optional.<BotApiMethod>empty();
                         }
                     })
                     .orElseGet(Optional::empty);
@@ -143,36 +152,6 @@ public class TelegramConnector extends TelegramLongPollingBot {
                 log.error("Unable to send message", e);
             }
 
-        } else if (update.hasCallbackQuery()) {
-            CallbackQuery callbackQuery = update.getCallbackQuery();
-            processCallbackQuery(callbackQuery);
-        }
-    }
-
-    private void processCallbackQuery(CallbackQuery callbackQuery) {
-        Message message = callbackQuery.getMessage();
-        String chatId = String.valueOf(callbackQuery.getMessage().getChat().getId());
-        String messageText = callbackQuery.getData();
-
-        log.info("Message from {}: {}", callbackQuery.getFrom().getUserName(), callbackQuery.getMessage().getText());
-
-        if (AnswerData.match(messageText)) {
-            AnswerData answerData = AnswerData.deserialize(messageText);
-            String questionId = answerData.getQuestionId();
-            log.debug("Received answer: question id = {}; answer code = {}", questionId, answerData.getAnswerCode());
-
-            callbacks.stream()
-                    .filter(c -> c.supports(answerData, message.getText()))
-                    .findFirst()
-                    .map(c -> c.process(message.getMessageId(), chatId, message.getText(), answerData))
-                    .filter(Optional::isPresent)
-                    .ifPresent(msg -> {
-                        try {
-                            execute(msg.get());
-                        } catch (TelegramApiException e) {
-                            log.error("Unable to send message", e);
-                        }
-                    });
         }
     }
 
