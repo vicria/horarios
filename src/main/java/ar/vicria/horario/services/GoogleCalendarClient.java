@@ -7,8 +7,12 @@ import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInsta
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.googleapis.auth.oauth2.GoogleRefreshTokenRequest;
+import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.calendar.Calendar;
@@ -33,20 +37,22 @@ import java.util.List;
 public class GoogleCalendarClient {
 
     private static final String APPLICATION_NAME = "free time bot";
+    private static final String ACCESS_TYPE = "offline";
+    private static final String calendarId = "primary";
     private static final List<String> SCOPES = Collections.singletonList(CalendarScopes.CALENDAR_READONLY);
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 
     private final GoogleCalendarProperties properties;
 
     private Credential credential;
+    private String refreshToken;
+    private org.joda.time.DateTime expirationDate;
 
     public List<Event> getMySchedule(boolean thisWeek) throws Exception {
         Credential credential = authorize();
         Calendar service = new Calendar.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, credential)
                 .setApplicationName(APPLICATION_NAME)
                 .build();
-
-        String calendarId = "primary"; // Идентификатор вашего календаря, например, "primary"
 
         DateTime startOfWeek = thisWeek ? DateUtil.startOfThisWeek() : DateUtil.startOfNextWeek();
         DateTime endOfWeek = thisWeek ? DateUtil.endOfThisWeek() : DateUtil.endOfNextWeek();
@@ -66,25 +72,47 @@ public class GoogleCalendarClient {
     private Credential authorize() throws IOException, GeneralSecurityException {
         if (credential == null) {
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-
             GoogleClientSecrets clientSecrets = loadClientSecrets();
 
+            // Запрашиваем offline access чтобы узнать токен
             GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
                     httpTransport, JSON_FACTORY, clientSecrets, SCOPES)
+                    .setAccessType(ACCESS_TYPE)  // Запрашиваем offline access чтобы узнать токен
                     .build();
 
-            LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(51767).build();
+            LocalServerReceiver receiver = new LocalServerReceiver.Builder()
+                    .setPort(properties.getRedirectPort())
+                    .build();
 
             credential = new AuthorizationCodeInstalledApp(
-                    flow, receiver).authorize("1021593323500-srtefgf540baufsrv2oplrbehchr3hak.apps.googleusercontent.com");
+                    flow, receiver).authorize(properties.getClientId());
+            refreshToken = credential.getRefreshToken();
+            expirationDate = new org.joda.time.DateTime(credential.getExpirationTimeMilliseconds());
+        } else if (expirationDate.isEqualNow() || expirationDate.isBeforeNow()) {
+            refreshToken();
+            expirationDate = new org.joda.time.DateTime(credential.getExpirationTimeMilliseconds());
         }
-//        String authorizationCode = ""; // Здесь укажите код авторизации, полученный после авторизации пользователя
-//        TokenResponse tokenResponse = flow.newTokenRequest(authorizationCode).setRedirectUri("http://localhost:51767/Callback").execute();
-//        String accessToken = tokenResponse.getAccessToken();
-//        String refreshToken = tokenResponse.getRefreshToken();
-
 
         return credential;
+    }
+
+
+    private void refreshToken() throws IOException, GeneralSecurityException {
+        GoogleClientSecrets clientSecrets = loadClientSecrets();
+        GoogleTokenResponse tokenResponse = new GoogleRefreshTokenRequest(
+                new NetHttpTransport(), new JacksonFactory(), refreshToken,
+                clientSecrets.getDetails().getClientId(), clientSecrets.getDetails().getClientSecret())
+                .execute();
+
+        HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+        credential = new GoogleCredential.Builder()
+                .setTransport(httpTransport)
+                .setJsonFactory(JSON_FACTORY)
+                .setClientSecrets(clientSecrets)
+                .build()
+                .setRefreshToken(refreshToken)
+                .setFromTokenResponse(tokenResponse);
+        refreshToken = credential.getRefreshToken();
     }
 
     private GoogleClientSecrets loadClientSecrets()

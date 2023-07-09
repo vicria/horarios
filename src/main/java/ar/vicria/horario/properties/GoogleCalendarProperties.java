@@ -34,6 +34,9 @@ public class GoogleCalendarProperties {
     @NotBlank
     private String redirectUris;
 
+    @NotBlank
+    private Integer redirectPort;
+
     @Override
     public String toString() {
         return "{\n" +

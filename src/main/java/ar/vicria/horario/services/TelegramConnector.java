@@ -46,64 +46,6 @@ public class TelegramConnector extends TelegramLongPollingBot {
         }
     }
 
-    public void sendMessage(String text, String chatId) {
-        SendMessage message = SendMessage.builder()
-                .chatId(chatId)
-                .text(text)
-                .parseMode(text)
-                .build();
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            log.error("Unable to send message", e);
-        }
-    }
-
-    public void updateText(Integer messageId, String text, String chatId) {
-        EditMessageText message = EditMessageText.builder()
-                .messageId(messageId)
-                .chatId(chatId)
-                .text(text)
-                .build();
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            log.error("Unable to send message", e);
-        }
-    }
-
-    public void updateText(Integer messageId, EditMessageText message, String chatId) {
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            log.error("Unable to send message", e);
-        }
-    }
-
-    /**
-     * Метод получение контакта от пользователя.
-     *
-     * @param chatId - id пользователя
-     */
-    @Deprecated
-    private void postRequestContactMessage(String chatId) {
-        SendMessage message = SendMessage.builder()
-                .chatId(chatId)
-                .text("Для использования бота необходимо зарегистрироваться")
-                .build();
-
-        KeyboardRow row = new KeyboardRow();
-        String buttonText = "Отправить свой контакт для регистрации";
-        row.add(KeyboardButton.builder().text(buttonText).requestContact(true).build());
-        message.setReplyMarkup(new ReplyKeyboardMarkup(Collections.singletonList(row)));
-
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            log.error("Unable to send invite message", e);
-        }
-    }
-
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() || update.hasCallbackQuery()) {

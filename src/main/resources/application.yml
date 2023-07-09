@@ -6,9 +6,12 @@ spring:
 logging.level:
   root: INFO
 
-ar:
-  vicria:
-    adapter:
-      telegram:
-        botUserName:
-        botToken:
+ar.vicria.adapter.telegram:
+  botUserName:
+  botToken:
+com.google.calendar:
+  clientId:
+  projectId:
+  clientSecret:
+  redirectUris:
+  redirectPort:
