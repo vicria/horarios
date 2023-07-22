@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  * Text msg after /free_time.
  */
 @Component
-public class FreeTimeNextWeekMessage extends TextMessage {
+public class FreeTimeWeekAfterWeekMessage extends TextMessage {
 
     private final GoogleCalendarClient client;
     private final EventMapper mapper;
@@ -35,7 +35,7 @@ public class FreeTimeNextWeekMessage extends TextMessage {
      * @param client
      * @param mapper
      */
-    protected FreeTimeNextWeekMessage(RowUtil rowUtil, GoogleCalendarClient client, EventMapper mapper) {
+    protected FreeTimeWeekAfterWeekMessage(RowUtil rowUtil, GoogleCalendarClient client, EventMapper mapper) {
         super(rowUtil);
         this.client = client;
         this.mapper = mapper;
@@ -54,15 +54,8 @@ public class FreeTimeNextWeekMessage extends TextMessage {
                     .getText();
             ;
         }
-        return answerData.getQuestionId().equals(FreeTimeMessage.class.getSimpleName())
-                && answerData.getAnswerCode().equals(100)
-
-                || answerData.getQuestionId().equals(getClass().getSimpleName())
-                && !answerData.getAnswerCode().equals(100)
-                && !answerData.getAnswerCode().equals(101)
-
-                || answerData.getQuestionId().equals(FreeTimeWeekAfterWeekMessage.class.getSimpleName())
-                && answerData.getAnswerCode().equals(100);
+        return answerData.getQuestionId().equals(FreeTimeNextWeekMessage.class.getSimpleName())
+                && answerData.getAnswerCode().equals(101);
     }
 
     @Override
@@ -72,7 +65,7 @@ public class FreeTimeNextWeekMessage extends TextMessage {
 
     @Override
     public String question() throws Exception {
-        Map<Week, List<EventDto>> collect = client.getMySchedule(7).stream()
+        Map<Week, List<EventDto>> collect = client.getMySchedule(14).stream()
                 .map(mapper::toDto)
                 .collect(Collectors.groupingBy(event -> {
                     int dayOfWeek = event.getStart().getDayOfWeek();
@@ -93,8 +86,8 @@ public class FreeTimeNextWeekMessage extends TextMessage {
 
         if (horario.isEmpty()) {
             empty = true;
-            return "Свободного времени на следующей неделе нет";
-        } else return "<b>Свободное время на следующей неделе (" + city
+            return "Свободного времени нет";
+        } else return "<b>Свободное время через неделю (" + city
                 + ")</b> \n" + horario;
     }
 
@@ -112,8 +105,7 @@ public class FreeTimeNextWeekMessage extends TextMessage {
                     .collect(Collectors.toList());
             answerDtos.addAll(answer);
         }
-        answerDtos.add(new AnswerDto(DateUtil.week(0) + " ⬅️", 100));
-        answerDtos.add(new AnswerDto("➡️ " + DateUtil.week(14), 101));
+        answerDtos.add(new AnswerDto(DateUtil.week(7) + " ⬅️", 100));
         return answerDtos;
     }
 }

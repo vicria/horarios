@@ -49,11 +49,11 @@ class HorarioMessageTest {
 
         responseEntity.add(lunes);
 
-        when(client.getMySchedule(true)).thenReturn(responseEntity);
+        when(client.getMySchedule(0)).thenReturn(responseEntity);
 
         String question = horarioMessage.question();
         assertEquals("<b>Расписание на этой неделе</b> \n" +
-                "чт 6.7:  10:30-11:30 \n", question);
+                "чт 06.07:  10:30-11:30 \n", question);
     }
 
     @Test
@@ -119,5 +119,46 @@ class HorarioMessageTest {
         List<EventDto> freeWindows = horarioMessage.inverse(events);
 
         assertEquals(2, freeWindows.size());
+    }
+
+    @Test
+    public void inverse4() {
+        HorarioMessage horarioMessage = new HorarioMessage(util, client, mapper);
+
+        List<EventDto> events = new ArrayList<>();
+        events.add(new EventDto(
+                new DateTime(2023, 7, 7, 10, 0),
+                new DateTime(2023, 7, 7, 12, 30)));
+        events.add(new EventDto(
+                new DateTime(2023, 7, 7, 17, 00),
+                new DateTime(2023, 7, 7, 22, 00)));
+
+        List<EventDto> freeWindows = horarioMessage.inverse(events);
+
+        assertEquals(1, freeWindows.size());
+    }
+
+    @Test
+    public void inverse5() {
+        HorarioMessage horarioMessage = new HorarioMessage(util, client, mapper);
+        horarioMessage.startTime = 16;
+        horarioMessage.endTime = 23;
+
+        List<EventDto> events = new ArrayList<>();
+        events.add(new EventDto(
+                new DateTime(2023, 7, 7, 16, 0),
+                new DateTime(2023, 7, 7, 19, 00)));
+        events.add(new EventDto(
+                new DateTime(2023, 7, 7, 19, 30),
+                new DateTime(2023, 7, 7, 21, 30)));
+        events.add(new EventDto(
+                new DateTime(2023, 7, 7, 21, 30),
+                new DateTime(2023, 7, 7, 22, 00)));
+
+        List<EventDto> freeWindows = horarioMessage.inverse(events);
+
+        assertEquals(1, freeWindows.size());
+        assertEquals(22, freeWindows.get(0).getStart().getHourOfDay());
+        assertEquals(0, freeWindows.get(0).getEnd().getHourOfDay());
     }
 }

@@ -9,18 +9,12 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 import javax.annotation.PostConstruct;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -71,8 +65,8 @@ public class TelegramConnector extends TelegramLongPollingBot {
                 }
             }
 
-            String finalChatId = chatId;
             AnswerData finalAnswerData = answerData;
+            String finalChatId = chatId;
             Optional<BotApiMethod> process = messages.stream()
                     .filter(m -> m.supports(finalAnswerData, msg))
                     .findFirst()
@@ -85,6 +79,7 @@ public class TelegramConnector extends TelegramLongPollingBot {
                         }
                     })
                     .orElseGet(Optional::empty);
+
 
             try {
                 if (process.isPresent()) {

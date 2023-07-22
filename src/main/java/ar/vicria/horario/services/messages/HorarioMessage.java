@@ -11,6 +11,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,7 @@ public class HorarioMessage extends TextMessage {
         super(rowUtil);
         this.client = client;
         this.mapper = mapper;
+        this.workDays = Arrays.asList(Week.values());
     }
 
     @Override
@@ -55,7 +57,7 @@ public class HorarioMessage extends TextMessage {
 
     @Override
     public String question() throws Exception {
-        Map<Week, List<EventDto>> collect = client.getMySchedule(true).stream()
+        Map<Week, List<EventDto>> collect = client.getMySchedule(0).stream()
                 .map(mapper::toDto)
                 .collect(Collectors.groupingBy(event -> {
                     int dayOfWeek = event.getStart().getDayOfWeek();

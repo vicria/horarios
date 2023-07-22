@@ -48,14 +48,14 @@ public class GoogleCalendarClient {
     private String refreshToken;
     private org.joda.time.DateTime expirationDate;
 
-    public List<Event> getMySchedule(boolean thisWeek) throws Exception {
+    public List<Event> getMySchedule(int days) throws Exception {
         Credential credential = authorize();
         Calendar service = new Calendar.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, credential)
                 .setApplicationName(APPLICATION_NAME)
                 .build();
 
-        DateTime startOfWeek = thisWeek ? DateUtil.startOfThisWeek() : DateUtil.startOfNextWeek();
-        DateTime endOfWeek = thisWeek ? DateUtil.endOfThisWeek() : DateUtil.endOfNextWeek();
+        DateTime startOfWeek = DateUtil.startOfWeek(days);
+        DateTime endOfWeek = DateUtil.endOfWeek(days);
         com.google.api.client.util.DateTime start = new com.google.api.client.util.DateTime(startOfWeek.toDate());
         com.google.api.client.util.DateTime end = new com.google.api.client.util.DateTime(endOfWeek.toDate());
         Events events = service.events().list(calendarId)
