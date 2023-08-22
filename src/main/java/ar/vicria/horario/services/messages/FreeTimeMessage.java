@@ -51,7 +51,8 @@ public class FreeTimeMessage extends TextMessage {
         empty = false;
         query = answerData != null;
         if (query) {
-            if (!answerData.getAnswerCode().equals(100) && !answerData.getAnswerCode().equals(101)) {
+            if (!answerData.getAnswerCode().equals(100) && !answerData.getAnswerCode().equals(101)
+                    && !answerData.getAnswerCode().equals(500)) {
                 hours = answerData.getAnswerCode();
                 city = super.answer().stream()
                         .filter(ans -> ans.getCode().equals(answerData.getAnswerCode()))
@@ -68,7 +69,9 @@ public class FreeTimeMessage extends TextMessage {
                 || answerData != null && answerData.getQuestionId().equals(FreeTimeNextWeekMessage.class.getSimpleName())
                 && answerData.getAnswerCode().equals(100)
                 || answerData != null && answerData.getQuestionId().equals(getClass().getSimpleName())
-                && !answerData.getAnswerCode().equals(100);
+                && !answerData.getAnswerCode().equals(100)
+                || answerData != null && answerData.getQuestionId().equals(getClass().getSimpleName())
+                && answerData.getAnswerCode().equals(500);
     }
 
     @Override
@@ -85,7 +88,7 @@ public class FreeTimeMessage extends TextMessage {
         Map<Week, List<EventDto>> collect = client.getMySchedule(0).stream()
                 .map(mapper::toDto)
                 .collect(Collectors.groupingBy(event -> {
-                    int dayOfWeek = event.getStart().getDayOfWeek();
+                    int dayOfWeek = event.getEnd().getDayOfWeek();
                     return Week.init(dayOfWeek);
                 }));
         Map<Week, List<EventDto>> free = new HashMap<>();

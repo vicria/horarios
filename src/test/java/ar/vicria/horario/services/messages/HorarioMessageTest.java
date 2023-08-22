@@ -6,6 +6,7 @@ import ar.vicria.horario.services.GoogleCalendarClient;
 import ar.vicria.horario.services.util.RowUtil;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
+import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +22,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
+@Slf4j
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class HorarioMessageTest {
@@ -147,18 +149,44 @@ class HorarioMessageTest {
         List<EventDto> events = new ArrayList<>();
         events.add(new EventDto(
                 new DateTime(2023, 7, 7, 16, 0),
-                new DateTime(2023, 7, 7, 19, 00)));
+                new DateTime(2023, 7, 7, 19, 0)));
         events.add(new EventDto(
                 new DateTime(2023, 7, 7, 19, 30),
                 new DateTime(2023, 7, 7, 21, 30)));
         events.add(new EventDto(
                 new DateTime(2023, 7, 7, 21, 30),
-                new DateTime(2023, 7, 7, 22, 00)));
+                new DateTime(2023, 7, 7, 22, 0)));
+
+        List<EventDto> freeWindows = horarioMessage.inverse(events);
+        log.info(freeWindows.toString());
+        assertEquals(1, freeWindows.size());
+
+        assertEquals(22, freeWindows.get(0).getStart().getHourOfDay());
+        assertEquals(23, freeWindows.get(0).getEnd().getHourOfDay());
+    }
+
+    @Test
+    public void inverse6() {
+        HorarioMessage horarioMessage = new HorarioMessage(util, client, mapper);
+        horarioMessage.startTime = 10;
+        horarioMessage.endTime = 18;
+
+        List<EventDto> events = new ArrayList<>();
+        events.add(new EventDto(
+                new DateTime(2023, 7, 7, 10, 0),
+                new DateTime(2023, 7, 7, 12, 30)));
+        events.add(new EventDto(
+                new DateTime(2023, 7, 7, 13, 0),
+                new DateTime(2023, 7, 7, 14, 0)));
+        events.add(new EventDto(
+                new DateTime(2023, 7, 7, 14, 30),
+                new DateTime(2023, 7, 7, 15, 30)));
+        events.add(new EventDto(
+                new DateTime(2023, 7, 7, 16, 0),
+                new DateTime(2023, 7, 7, 17, 0)));
 
         List<EventDto> freeWindows = horarioMessage.inverse(events);
 
-        assertEquals(1, freeWindows.size());
-        assertEquals(22, freeWindows.get(0).getStart().getHourOfDay());
-        assertEquals(0, freeWindows.get(0).getEnd().getHourOfDay());
+        assertEquals(0, freeWindows.size());
     }
 }

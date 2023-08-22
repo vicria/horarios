@@ -44,7 +44,8 @@ public class FreeTimeWeekAfterWeekMessage extends TextMessage {
     @Override
     public boolean supports(AnswerData answerData, String msg) {
         empty = false;
-        if (answerData != null && !answerData.getAnswerCode().equals(100) && !answerData.getAnswerCode().equals(101)) {
+        if (answerData != null && !answerData.getAnswerCode().equals(100) && !answerData.getAnswerCode().equals(101)
+                && !answerData.getAnswerCode().equals(500)) {
             hours = answerData.getAnswerCode();
             List<AnswerDto> answer = super.answer();
             city = answer.stream()
@@ -52,10 +53,16 @@ public class FreeTimeWeekAfterWeekMessage extends TextMessage {
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("don't have this city"))
                     .getText();
-            ;
         }
         return answerData.getQuestionId().equals(FreeTimeNextWeekMessage.class.getSimpleName())
-                && answerData.getAnswerCode().equals(101);
+                && answerData.getAnswerCode().equals(101)
+
+                || answerData.getQuestionId().equals(getClass().getSimpleName())
+                && !answerData.getAnswerCode().equals(100)
+                && !answerData.getAnswerCode().equals(101)
+
+                || answerData.getQuestionId().equals(getClass().getSimpleName())
+                && answerData.getAnswerCode().equals(500);
     }
 
     @Override
@@ -68,7 +75,7 @@ public class FreeTimeWeekAfterWeekMessage extends TextMessage {
         Map<Week, List<EventDto>> collect = client.getMySchedule(14).stream()
                 .map(mapper::toDto)
                 .collect(Collectors.groupingBy(event -> {
-                    int dayOfWeek = event.getStart().getDayOfWeek();
+                    int dayOfWeek = event.getEnd().getDayOfWeek();
                     return Week.init(dayOfWeek);
                 }));
         Map<Week, List<EventDto>> free = new HashMap<>();
