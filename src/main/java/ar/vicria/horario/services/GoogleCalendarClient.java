@@ -19,7 +19,7 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 
@@ -32,8 +32,8 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
 
+@Slf4j
 @Component
-@RequiredArgsConstructor
 public class GoogleCalendarClient {
 
     private static final String APPLICATION_NAME = "free time bot";
@@ -47,6 +47,11 @@ public class GoogleCalendarClient {
     private Credential credential;
     private String refreshToken;
     private org.joda.time.DateTime expirationDate;
+
+    public GoogleCalendarClient(GoogleCalendarProperties properties) {
+        this.properties = properties;
+        this.refreshToken = properties.getRefreshToken();
+    }
 
     public List<Event> getMySchedule(int days) throws Exception {
         Credential credential = authorize();
@@ -70,7 +75,12 @@ public class GoogleCalendarClient {
     }
 
     private Credential authorize() throws IOException, GeneralSecurityException {
-        if (credential == null) {
+        if (!properties.getLocalhost() && expirationDate == null
+                || expirationDate != null && expirationDate.isEqualNow()
+                || expirationDate != null && expirationDate.isBeforeNow()) {
+            refreshToken();
+            expirationDate = new org.joda.time.DateTime(credential.getExpirationTimeMilliseconds());
+        } else if (credential == null) {
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             GoogleClientSecrets clientSecrets = loadClientSecrets();
 
@@ -87,9 +97,9 @@ public class GoogleCalendarClient {
             credential = new AuthorizationCodeInstalledApp(
                     flow, receiver).authorize(properties.getClientId());
             refreshToken = credential.getRefreshToken();
-            expirationDate = new org.joda.time.DateTime(credential.getExpirationTimeMilliseconds());
-        } else if (expirationDate.isEqualNow() || expirationDate.isBeforeNow()) {
-            refreshToken();
+            log.info("---NEW REFRESH TOKEN----------------------------------------------------");
+            log.info(refreshToken);
+            log.info("------------------------------------------------------------------------");
             expirationDate = new org.joda.time.DateTime(credential.getExpirationTimeMilliseconds());
         }
 

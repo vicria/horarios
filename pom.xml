@@ -46,6 +46,11 @@
             <artifactId>spring-kafka</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
@@ -117,26 +122,26 @@
                         </execution>
                     </executions>
                 </plugin>
-<!--                <plugin>-->
-<!--                    <groupId>org.jacoco</groupId>-->
-<!--                    <artifactId>jacoco-maven-plugin</artifactId>-->
-<!--                    <version>0.8.7</version>-->
-<!--                    <executions>-->
-<!--                        <execution>-->
-<!--                            <goals>-->
-<!--                                <goal>prepare-agent</goal>-->
-<!--                            </goals>-->
-<!--                        </execution>-->
-<!--                        &lt;!&ndash; attached to Maven test phase &ndash;&gt;-->
-<!--                        <execution>-->
-<!--                            <id>report</id>-->
-<!--                            <phase>verify</phase>-->
-<!--                            <goals>-->
-<!--                                <goal>report</goal>-->
-<!--                            </goals>-->
-<!--                        </execution>-->
-<!--                    </executions>-->
-<!--                </plugin>-->
+                <!--                <plugin>-->
+                <!--                    <groupId>org.jacoco</groupId>-->
+                <!--                    <artifactId>jacoco-maven-plugin</artifactId>-->
+                <!--                    <version>0.8.7</version>-->
+                <!--                    <executions>-->
+                <!--                        <execution>-->
+                <!--                            <goals>-->
+                <!--                                <goal>prepare-agent</goal>-->
+                <!--                            </goals>-->
+                <!--                        </execution>-->
+                <!--                        &lt;!&ndash; attached to Maven test phase &ndash;&gt;-->
+                <!--                        <execution>-->
+                <!--                            <id>report</id>-->
+                <!--                            <phase>verify</phase>-->
+                <!--                            <goals>-->
+                <!--                                <goal>report</goal>-->
+                <!--                            </goals>-->
+                <!--                        </execution>-->
+                <!--                    </executions>-->
+                <!--                </plugin>-->
             </plugins>
         </pluginManagement>
         <plugins>
@@ -184,29 +189,29 @@
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-checkstyle-plugin</artifactId>-->
-<!--                <version>${maven-checkstyle-plugin.version}</version>-->
-<!--                <configuration>-->
-<!--                    <configLocation>CheckStyleV8.xml</configLocation>-->
-<!--                    <encoding>UTF-8</encoding>-->
-<!--                    <consoleOutput>true</consoleOutput>-->
-<!--&lt;!&ndash;                    <violationSeverity>warning</violationSeverity>&ndash;&gt;-->
-<!--                    <failsOnError>true</failsOnError>-->
-<!--                    <linkXRef>false</linkXRef>-->
-<!--                    <suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>-->
-<!--                </configuration>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>validate</id>-->
-<!--                        <phase>validate</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>check</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
+            <!--            <plugin>-->
+            <!--                <groupId>org.apache.maven.plugins</groupId>-->
+            <!--                <artifactId>maven-checkstyle-plugin</artifactId>-->
+            <!--                <version>${maven-checkstyle-plugin.version}</version>-->
+            <!--                <configuration>-->
+            <!--                    <configLocation>CheckStyleV8.xml</configLocation>-->
+            <!--                    <encoding>UTF-8</encoding>-->
+            <!--                    <consoleOutput>true</consoleOutput>-->
+            <!--&lt;!&ndash;                    <violationSeverity>warning</violationSeverity>&ndash;&gt;-->
+            <!--                    <failsOnError>true</failsOnError>-->
+            <!--                    <linkXRef>false</linkXRef>-->
+            <!--                    <suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>-->
+            <!--                </configuration>-->
+            <!--                <executions>-->
+            <!--                    <execution>-->
+            <!--                        <id>validate</id>-->
+            <!--                        <phase>validate</phase>-->
+            <!--                        <goals>-->
+            <!--                            <goal>check</goal>-->
+            <!--                        </goals>-->
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--            </plugin>-->
         </plugins>
     </build>
 </project>

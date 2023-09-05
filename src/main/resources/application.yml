@@ -2,7 +2,8 @@ server:
   port: 8085
 
 spring:
-  main.banner-mode: 'off'
+  banner:
+    location: classpath:vicria-banner.txt
 logging.level:
   root: INFO
 
@@ -13,5 +14,6 @@ com.google.calendar:
   clientId:
   projectId:
   clientSecret:
-  redirectUris:
+  localhost:
   redirectPort:
+  refreshToken:

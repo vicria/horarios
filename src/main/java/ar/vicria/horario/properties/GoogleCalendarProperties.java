@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /**
  * Telegram properties for connection.
@@ -31,11 +32,13 @@ public class GoogleCalendarProperties {
     @NotBlank
     private String clientSecret;
 
-    @NotBlank
-    private String redirectUris;
+    @NotNull
+    private Boolean localhost;
 
     @NotBlank
     private Integer redirectPort;
+
+    private String refreshToken;
 
     @Override
     public String toString() {
@@ -46,10 +49,7 @@ public class GoogleCalendarProperties {
                 "    \"auth_uri\": \"" + authUri +"\",\n" +
                 "    \"token_uri\": \"" + tokenUri +"\",\n" +
                 "    \"auth_provider_x509_cert_url\": \"" + authProviderX509CertUrl +"\",\n" +
-                "    \"client_secret\": \"" + clientSecret +"\",\n" +
-                "    \"redirect_uris\": [\n" +
-                "      \"" + redirectUris +"\"\n" +
-                "    ]\n" +
+                "    \"client_secret\": \"" + clientSecret +"\"\n" +
                 "  }\n" +
                 "}";
     }
