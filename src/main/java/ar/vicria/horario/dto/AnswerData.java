@@ -1,6 +1,8 @@
 package ar.vicria.horario.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
@@ -14,14 +16,15 @@ import java.util.regex.Pattern;
  */
 @Setter
 @Getter
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class AnswerData {
 
     private static final String PREFIX = "/answer";
     private static final String DELIMITER = "#";
 
-    private final String questionId;
-    private final Integer answerCode;
+    private String questionId;
+    private Integer answerCode;
 
     /**
      * getting text for button.

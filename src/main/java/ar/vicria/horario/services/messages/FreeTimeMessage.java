@@ -3,6 +3,7 @@ package ar.vicria.horario.services.messages;
 import ar.vicria.horario.dto.EventDto;
 import ar.vicria.horario.dto.Week;
 import ar.vicria.horario.mapper.EventMapper;
+import ar.vicria.horario.properties.TelegramProperties;
 import ar.vicria.horario.services.GoogleCalendarClient;
 import ar.vicria.horario.dto.AnswerData;
 import ar.vicria.horario.dto.AnswerDto;
@@ -29,6 +30,7 @@ public class FreeTimeMessage extends TextMessage {
 
     private final GoogleCalendarClient client;
     private final EventMapper mapper;
+    private final TelegramProperties properties;
 
     private boolean query;
     private boolean empty = false;
@@ -36,20 +38,25 @@ public class FreeTimeMessage extends TextMessage {
     /**
      * Constrictor.
      *
-     * @param rowUtil util for telegram menu
+     * @param rowUtil    util for telegram menu
      * @param client
      * @param mapper
+     * @param properties
      */
-    protected FreeTimeMessage(RowUtil rowUtil, GoogleCalendarClient client, EventMapper mapper) {
+    protected FreeTimeMessage(RowUtil rowUtil,
+                              GoogleCalendarClient client,
+                              EventMapper mapper,
+                              TelegramProperties properties) {
         super(rowUtil);
         this.client = client;
         this.mapper = mapper;
+        this.properties = properties;
     }
 
     @Override
     public boolean supports(AnswerData answerData, String msg) {
         empty = false;
-        query = answerData != null;
+        query = answerData != null && answerData.getAnswerCode() != null;
         if (query) {
             if (!answerData.getAnswerCode().equals(100) && !answerData.getAnswerCode().equals(101)
                     && !answerData.getAnswerCode().equals(500)) {
@@ -64,7 +71,7 @@ public class FreeTimeMessage extends TextMessage {
             hours = 6;
             city = "Москва";
         }
-        return msg.equals("/free_time@time_vicria_bot")
+        return msg.equals("/free_time@" + properties.getBotUserName())
                 || msg.equals("/free_time")
                 || answerData != null && answerData.getQuestionId().equals(FreeTimeNextWeekMessage.class.getSimpleName())
                 && answerData.getAnswerCode().equals(100)

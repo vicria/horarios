@@ -16,9 +16,7 @@ import java.util.List;
  */
 @Order(0)
 @Component
-public class StartMessage extends TextMessage {
-
-    boolean isChat;
+public class AdminMessage extends TextMessage {
 
     private final TelegramProperties properties;
 
@@ -28,19 +26,19 @@ public class StartMessage extends TextMessage {
      * @param rowUtil    util for telegram menu
      * @param properties
      */
-    protected StartMessage(RowUtil rowUtil, TelegramProperties properties) {
+    protected AdminMessage(RowUtil rowUtil, TelegramProperties properties) {
         super(rowUtil);
         this.properties = properties;
     }
 
     @Override
     public boolean supports(AnswerData answerData, String msg) {
-        isChat = msg.contains("@");
-        return msg.equals("/start") || msg.equals("/start@" + properties.getBotUserName());
+        return msg.equals("/admin") && properties.getAdmins().contains(answerData.getQuestionId());
     }
 
     @Override
     public SendMessage process(String chatId, Integer msgId) {
+        properties.setChatIdAdmin(chatId);
         SendMessage message = SendMessage.builder()
                 .chatId(chatId)
                 .text(question())
@@ -50,11 +48,7 @@ public class StartMessage extends TextMessage {
 
     @Override
     public String question() {
-        String postfix = isChat ? "@" + properties.getBotUserName() : "";
-        return "Привет. Я подскажу свободное время для консультаций у Вики Пашкевич."
-                + "\n\nВызови команду: \n/free_time" + postfix
-                + "\n\nПосле этого появится меню на три недели. "
-                + "Выбери время и пришли его в чат";
+        return "админ назначен " + properties.getChatIdAdmin();
     }
 
     /**

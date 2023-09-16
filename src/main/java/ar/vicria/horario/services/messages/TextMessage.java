@@ -17,6 +17,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -122,12 +123,10 @@ public abstract class TextMessage {
      * @return msg
      */
     SendMessage sendMessage(SendMessage message, List<String> buttonNames) {
-        List<KeyboardRow> rows = new ArrayList<>();
-        for (String button : buttonNames) {
-            KeyboardRow row = new KeyboardRow();
-            row.add(KeyboardButton.builder().text(button).build());
-            rows.add(row);
-        }
+        List<KeyboardRow> rows = buttonNames.stream()
+                .map(KeyboardButton::new)
+                .map(b -> new KeyboardRow(Collections.singleton(b)))
+                .collect(Collectors.toList());
 
         message.setReplyMarkup(new ReplyKeyboardMarkup(rows));
         message.setParseMode("HTML");

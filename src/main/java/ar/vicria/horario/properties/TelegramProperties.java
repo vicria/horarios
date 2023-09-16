@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 /**
  * Telegram properties for connection.
@@ -26,4 +27,13 @@ public class TelegramProperties {
     @NotBlank
     private String botToken;
 
+    /**
+     * Кто может просматривать расписание вне чата
+     */
+    private List<String> admins;
+
+    /**
+     * для дублежа сообщений
+     */
+    private String chatIdAdmin;
 }

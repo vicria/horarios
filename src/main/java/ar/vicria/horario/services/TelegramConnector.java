@@ -44,18 +44,22 @@ public class TelegramConnector extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() || update.hasCallbackQuery()) {
             Message message = update.hasCallbackQuery() ? update.getCallbackQuery().getMessage() : update.getMessage();
-            log.info("Received answer: name = {}; text = {}", message.getFrom().getFirstName(), message.getText());
+            log.info("Received answer: username = {}; text = {}", message.getFrom().getUserName(), message.getText());
 
             String chatId = message.getFrom().getId().toString();
             String msg = message.getText();
 
-
+            if (msg == null) {
+                //бот добавили в чат
+                msg = "/start@" + properties.getBotUserName();
+            }
             if (msg.contains("@" + getBotUsername())) {
                 // Бот был упомянут в сообщении
                 chatId = message.getChat().getId().toString();
             }
 
-            AnswerData answerData = null;
+            AnswerData answerData = new AnswerData();
+            answerData.setQuestionId(message.getFrom().getUserName());
             if (update.hasCallbackQuery()) {
                 chatId = String.valueOf(message.getChat().getId());
                 String messageText = update.getCallbackQuery().getData();
@@ -67,8 +71,9 @@ public class TelegramConnector extends TelegramLongPollingBot {
 
             AnswerData finalAnswerData = answerData;
             String finalChatId = chatId;
+            String finalMsg = msg;
             Optional<BotApiMethod> process = messages.stream()
-                    .filter(m -> m.supports(finalAnswerData, msg))
+                    .filter(m -> m.supports(finalAnswerData, finalMsg))
                     .findFirst()
                     .map(m -> {
                         try {

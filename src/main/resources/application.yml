@@ -10,6 +10,8 @@ logging.level:
 ar.vicria.adapter.telegram:
   botUserName:
   botToken:
+  admins:
+  chatIdAdmin:
 com.google.calendar:
   clientId:
   projectId:

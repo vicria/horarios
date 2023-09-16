@@ -54,7 +54,9 @@ public class FreeTimeWeekAfterWeekMessage extends TextMessage {
                     .orElseThrow(() -> new IllegalArgumentException("don't have this city"))
                     .getText();
         }
-        return answerData.getQuestionId().equals(FreeTimeNextWeekMessage.class.getSimpleName())
+        return answerData != null
+                && answerData.getAnswerCode() != null
+                && (answerData.getQuestionId().equals(FreeTimeNextWeekMessage.class.getSimpleName())
                 && answerData.getAnswerCode().equals(101)
 
                 || answerData.getQuestionId().equals(getClass().getSimpleName())
@@ -62,7 +64,7 @@ public class FreeTimeWeekAfterWeekMessage extends TextMessage {
                 && !answerData.getAnswerCode().equals(101)
 
                 || answerData.getQuestionId().equals(getClass().getSimpleName())
-                && answerData.getAnswerCode().equals(500);
+                && answerData.getAnswerCode().equals(500));
     }
 
     @Override
