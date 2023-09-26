@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
@@ -35,6 +37,24 @@ public class TelegramConnector extends TelegramLongPollingBot {
         try {
             TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
             botsApi.registerBot(this);
+
+            SetMyCommands commands = SetMyCommands.builder()
+                    .clearCommands()
+                    .command(BotCommand.builder()
+                            .command("start")
+                            .description("запуск бота")
+                            .build())
+                    .command(BotCommand.builder()
+                            .command("free_time")
+                            .description("актуальное расписание")
+                            .build())
+                    .command(BotCommand.builder()
+                            .command("pause")
+                            .description("нет даты следующей встречи")
+                            .build())
+                    .build();
+            execute(commands);
+
         } catch (TelegramApiException e) {
             throw new RuntimeException("Unable to register telegram bot", e);
         }
@@ -50,10 +70,9 @@ public class TelegramConnector extends TelegramLongPollingBot {
             String msg = message.getText();
 
             if (msg == null) {
-                //бот добавили в чат
-                msg = "/start@" + properties.getBotUserName();
+                return;
             }
-            if (msg.contains("@" + getBotUsername())) {
+            if (msg.contains("@" + getBotUsername()) || !message.isCommand()) {
                 // Бот был упомянут в сообщении
                 chatId = message.getChat().getId().toString();
             }
@@ -71,15 +90,14 @@ public class TelegramConnector extends TelegramLongPollingBot {
 
             AnswerData finalAnswerData = answerData;
             String finalChatId = chatId;
-            String finalMsg = msg;
             Optional<BotApiMethod> process = messages.stream()
-                    .filter(m -> m.supports(finalAnswerData, finalMsg))
+                    .filter(m -> m.supports(finalAnswerData, msg))
                     .findFirst()
                     .map(m -> {
                         try {
                             return Optional.of(m.process(finalChatId, message.getMessageId()));
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            log.error("Ошибка отправки сообщения");
                             return Optional.<BotApiMethod>empty();
                         }
                     })

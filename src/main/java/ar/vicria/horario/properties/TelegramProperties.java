@@ -28,7 +28,7 @@ public class TelegramProperties {
     private String botToken;
 
     /**
-     * Кто может просматривать расписание вне чата
+     * Кто может просматривать расписание вне чата.
      */
     private List<String> admins;
 

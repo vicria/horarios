@@ -53,7 +53,7 @@ public class NotInChatMessage extends TextMessage {
     }
 
     @Override
-    public BotApiMethod process(String chatId, Integer msgId) throws Exception {
+    public BotApiMethod process(String chatId, Integer msgId) {
         SendMessage sendMessage = postQuestionFirst("@" + username + " пытается узнать расписание",
                 getClass().getSimpleName(),
                 answer(),
@@ -67,7 +67,7 @@ public class NotInChatMessage extends TextMessage {
     }
 
     @Override
-    public String question() throws Exception {
+    public String question() {
         return "Используй бот только в общем чате, пожалуйста. Или напиши Вике";
 
     }

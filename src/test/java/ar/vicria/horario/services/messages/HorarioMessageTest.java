@@ -189,4 +189,23 @@ class HorarioMessageTest {
 
         assertEquals(0, freeWindows.size());
     }
+
+    @Test
+    public void inverse7() {
+        HorarioMessage horarioMessage = new HorarioMessage(util, client, mapper);
+        horarioMessage.startTime = 10;
+        horarioMessage.endTime = 18;
+
+        List<EventDto> events = new ArrayList<>();
+        events.add(new EventDto(
+                new DateTime(2023, 9, 8, 10, 30),
+                new DateTime(2023, 9, 8, 11, 0)));
+        events.add(new EventDto(
+                new DateTime(2023, 9, 8, 11, 0),
+                new DateTime(2023, 9, 8, 12, 0)));
+
+        List<EventDto> freeWindows = horarioMessage.inverse(events);
+
+        assertEquals(1, freeWindows.size());
+    }
 }

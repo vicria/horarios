@@ -43,6 +43,9 @@ public class FreeTimeWeekAfterWeekMessage extends TextMessage {
 
     @Override
     public boolean supports(AnswerData answerData, String msg) {
+        if (answerData.getAnswerCode() == null) {
+            return false;
+        }
         empty = false;
         if (answerData != null && !answerData.getAnswerCode().equals(100) && !answerData.getAnswerCode().equals(101)
                 && !answerData.getAnswerCode().equals(500)) {

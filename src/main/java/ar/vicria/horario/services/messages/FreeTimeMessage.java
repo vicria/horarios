@@ -104,7 +104,7 @@ public class FreeTimeMessage extends TextMessage {
         for (var week : collect.keySet()) {
             List<EventDto> eventDtos = collect.get(week);
             List<EventDto> freeWindows = inverse(eventDtos).stream()
-                    .filter(eventDto -> eventDto.getStart().getDayOfMonth() >= DateUtil.now().getDayOfMonth())
+                    .filter(eventDto -> eventDto.getStart().isAfterNow())
                     .peek(eventDto -> eventDto.setStart(eventDto.getStart().plusHours(hours)))
                     .peek(eventDto -> eventDto.setEnd(eventDto.getEnd().plusHours(hours)))
                     .filter(eventDto -> {

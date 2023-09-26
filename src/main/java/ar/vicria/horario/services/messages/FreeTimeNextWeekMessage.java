@@ -43,8 +43,11 @@ public class FreeTimeNextWeekMessage extends TextMessage {
 
     @Override
     public boolean supports(AnswerData answerData, String msg) {
+        if (answerData.getAnswerCode() == null) {
+            return false;
+        }
         empty = false;
-        if (answerData != null && !answerData.getAnswerCode().equals(100) && !answerData.getAnswerCode().equals(101)
+        if (!answerData.getAnswerCode().equals(100) && !answerData.getAnswerCode().equals(101)
                 && !answerData.getAnswerCode().equals(500)) {
             hours = answerData.getAnswerCode();
             List<AnswerDto> answer = super.answer();
@@ -54,8 +57,7 @@ public class FreeTimeNextWeekMessage extends TextMessage {
                     .orElseThrow(() -> new IllegalArgumentException("don't have this city"))
                     .getText();
         }
-        return answerData != null
-                && answerData.getAnswerCode() != null
+        return answerData.getAnswerCode() != null
                 && (answerData.getQuestionId().equals(FreeTimeMessage.class.getSimpleName())
                 && answerData.getAnswerCode().equals(100)
 

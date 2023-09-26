@@ -46,7 +46,7 @@ public class AddUserMessage extends TextMessage {
     }
 
     @Override
-    public BotApiMethod process(String chatId, Integer msgId) throws Exception {
+    public BotApiMethod process(String chatId, Integer msgId) {
         List<String> admins = properties.getAdmins();
         admins.add(this.user);
         properties.setAdmins(admins);
@@ -54,7 +54,7 @@ public class AddUserMessage extends TextMessage {
     }
 
     @Override
-    public String question() throws Exception {
+    public String question() {
         return String.format("пользователь %s добавлен", user);
     }
 
