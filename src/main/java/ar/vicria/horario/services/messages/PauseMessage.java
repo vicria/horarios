@@ -16,6 +16,7 @@ import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberOwner;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -55,10 +56,8 @@ public class PauseMessage extends TextMessage {
 
     @Override
     public SendMessage process(String chatId, Integer msgId) {
-        String filePath = Objects.requireNonNull(getClass().getClassLoader().getResource("chat/wait.jpg")).getFile();
-        File file = new File(filePath);
-        var inputFile = new InputFile();
-        inputFile.setMedia(file);
+        InputStream inputStream = Objects.requireNonNull(getClass().getResourceAsStream("/chat/wait.jpg"));
+        var inputFile = new InputFile(inputStream, "wait.jpg");
         SetChatPhoto chatPhoto = SetChatPhoto.builder()
                 .chatId(chatId)
                 .photo(inputFile)

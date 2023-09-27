@@ -17,6 +17,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -32,6 +33,8 @@ public class RunMessage extends TextMessage {
     private final TelegramProperties properties;
     private final TelegramConnector connector;
     private Integer messageId;
+
+    private final String FILE_NAME = "run.jpg";
 
     /**
      * Constrictor.
@@ -56,10 +59,8 @@ public class RunMessage extends TextMessage {
 
     @Override
     public BotApiMethod process(String chatId, Integer msgId) {
-        String filePath = Objects.requireNonNull(getClass().getClassLoader().getResource("chat/run.jpg")).getFile();
-        File file = new File(filePath);
-        var inputFile = new InputFile();
-        inputFile.setMedia(file);
+        InputStream inputStream = Objects.requireNonNull(getClass().getResourceAsStream("/chat/" + FILE_NAME));
+        var inputFile = new InputFile(inputStream, FILE_NAME);
         SetChatPhoto chatPhoto = SetChatPhoto.builder()
                 .chatId(chatId)
                 .photo(inputFile)
