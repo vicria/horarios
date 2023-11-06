@@ -33,7 +33,7 @@ public abstract class TextMessage {
     public String city = "Москва";
 
     public Integer startTime = 10;
-    public Integer endTime = 18;
+    public Integer endTime = 20;
 
     public EventDto workTime = new EventDto(new DateTime(2023, 7, 7, startTime, 0),
             new DateTime(2023, 7, 7, endTime, 0));
@@ -255,8 +255,10 @@ public abstract class TextMessage {
     List<AnswerDto> answer() {
         return Arrays.asList(new AnswerDto("Москва", 6),
                 new AnswerDto("Буэнос Айрес", 0),
-                new AnswerDto("Лондон", 4),
-                new AnswerDto("Варшава", 5),
+                new AnswerDto("Лондон", 3),
+                new AnswerDto("Варшава", 4),
+                new AnswerDto("Иерусалим", 5),
+                new AnswerDto("США (Восток)", -2),
                 new AnswerDto("\uD83D\uDD04", 500));
     }
 }
