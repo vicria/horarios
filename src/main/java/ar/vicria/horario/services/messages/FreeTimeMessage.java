@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 /**
  * Text msg after /free_time.
  */
-@Order(0)
 @Component
 public class FreeTimeMessage extends TextMessage {
 
@@ -90,6 +89,10 @@ public class FreeTimeMessage extends TextMessage {
         }
     }
 
+    private DateTime timeZoneTime(DateTime calendarTime) {
+        return hours >= 0 ? calendarTime.plusHours(hours) : calendarTime.minusHours(Math.abs(hours));
+    }
+
     @Override
     public String question() throws Exception {
         Map<Week, List<EventDto>> collect = client.getMySchedule(0).stream()
@@ -105,8 +108,8 @@ public class FreeTimeMessage extends TextMessage {
             List<EventDto> eventDtos = collect.get(week);
             List<EventDto> freeWindows = inverse(eventDtos).stream()
                     .filter(eventDto -> eventDto.getStart().isAfterNow())
-                    .peek(eventDto -> eventDto.setStart(eventDto.getStart().plusHours(hours)))
-                    .peek(eventDto -> eventDto.setEnd(eventDto.getEnd().plusHours(hours)))
+                    .peek(eventDto -> eventDto.setStart(timeZoneTime(eventDto.getStart())))
+                    .peek(eventDto -> eventDto.setEnd(timeZoneTime(eventDto.getEnd())))
                     .filter(eventDto -> {
                         if (week.getNumber() == DateTime.now().getDayOfWeek()
                                 && !eventDto.getStart().isAfter(cutDate)) {

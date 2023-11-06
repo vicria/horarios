@@ -72,7 +72,7 @@ public class AnswerData {
      */
     public static AnswerData deserialize(String text) {
         Pattern pattern = Pattern.compile("^" + Pattern.quote(PREFIX + DELIMITER)
-                + "([^" + DELIMITER + "]+)" + Pattern.quote(DELIMITER) + "(\\d+)$");
+                + "([^" + DELIMITER + "]+)" + Pattern.quote(DELIMITER) + "(-?\\d+)$");
         Matcher matcher = pattern.matcher(text);
         if (matcher.matches()) {
             String questionId = matcher.group(1);
